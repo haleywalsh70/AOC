@@ -2,7 +2,7 @@ import os
 
 def get_data():
     cwd = os.getcw()
-    with open(cwd + '/Jour1-input.txt', 'r') as file:
+    with open(cwd + '/Jour01-input.txt', 'r') as file:
         data = file.readlines()
         column1 = []
         column2 = []
