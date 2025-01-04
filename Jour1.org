@@ -36,3 +36,4 @@ Enfin, le plus grand nombre de la liste de gauche est 4, tandis que le plus gran
 Pour trouver la distance totale entre la liste de gauche et la liste de droite, additionnez les distances entre toutes les paires que vous avez trouvées. Dans l'exemple ci-dessus, cela correspond à 2 + 1 + 0 + 1 + 2 + 5, soit une distance totale de 11 !
 
 Vos listes gauche et droite contiennent de nombreux identifiants d'emplacement. Quelle est la distance totale entre vos listes ?
+Reponse: 2192892
