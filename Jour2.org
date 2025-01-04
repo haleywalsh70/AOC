@@ -30,3 +30,26 @@ Dans l'exemple ci-dessus, les rapports peuvent être jugés sûrs ou non en vér
 Donc, dans cet exemple, 2 rapports sont sûrs.
 
 Analysez les données inhabituelles des ingénieurs. Combien de rapports sont sûrs ?
+
+REPONSE: 230
+
+--- Deuxième partie ---
+Les ingénieurs sont surpris par le faible nombre de rapports sûrs jusqu'à ce qu'ils réalisent qu'ils ont oublié de vous parler de l'amortisseur de problèmes.
+
+L'amortisseur de problèmes est un module monté sur le réacteur qui permet aux systèmes de sécurité du réacteur de tolérer un seul niveau défectueux dans ce qui serait autrement un rapport sûr. C'est comme si le niveau défectueux n'était jamais arrivé !
+
+Maintenant, les mêmes règles s'appliquent qu'avant, sauf que si la suppression d'un seul niveau d'un rapport non sûr le rendrait sûr, le rapport est alors considéré comme sûr.
+
+Plus de rapports de l'exemple ci-dessus sont désormais sûrs :
+
+7 6 4 2 1 : Sûr sans suppression de niveau.
+1 2 7 8 9 : Non sûr quel que soit le niveau supprimé.
+9 7 6 2 1 : Non sûr quel que soit le niveau supprimé.
+1 3 2 4 5 : Sécuritaire en supprimant le deuxième niveau, 3.
+8 6 4 4 1 : Sécuritaire en supprimant le troisième niveau, 4.
+1 3 6 7 9 : Sécuritaire sans supprimer aucun niveau.
+Grâce à l'amortisseur de problèmes, 4 rapports sont réellement sûrs !
+
+Mettez à jour votre analyse en gérant les situations où l'amortisseur de problèmes peut supprimer un seul niveau des rapports non sûrs. Combien de rapports sont désormais sûrs ?
+
+REPONSE: 301
