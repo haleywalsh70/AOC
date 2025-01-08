@@ -1,0 +1,3 @@
+* Projet Advent of code
+
+- Jour 1: OK
