@@ -1,4 +1,5 @@
 import os
+import itertools
 
 def get_data():
     cwd = os.getcwd()
@@ -13,65 +14,42 @@ def get_data():
         equations.append((target, numbers))
     return equations
 
-def evaluate_with_pruning(numbers, target, current_value, index): # recursion
-    if index == len(numbers):
-        return current_value == target
-
-    # Stop exploring if the current value exceeds the target
-    if current_value > target:
-        return False # careful if ones exist since adding can result in bigger then multiplying
-                     # but it seems theres no cases where it happens.
-
-    if evaluate_with_pruning(numbers, target, current_value + numbers[index], index + 1):
-        return True
-
-    if evaluate_with_pruning(numbers, target, current_value * numbers[index], index + 1):
-        return True
-
-    return False
-
-def evaluate_equation(target, numbers):
-    return evaluate_with_pruning(numbers, target, numbers[0], 1)
+def eval_combo_part_1(combo, numbers):
+    resultat = numbers[0]
+    for index in range(0, len(numbers) - 1):
+        if combo[index] == "+":
+            resultat += numbers[index + 1]
+        elif combo[index] == "*":
+            resultat *= numbers[index + 1]
+    return resultat
 
 def part1():
     equations = get_data()
     total_calibration_result = 0
-
     for target, numbers in equations:
-        if evaluate_equation(target, numbers):
-            total_calibration_result += target
-
+        for combo in itertools.product("*+", repeat=len(numbers)-1):
+            if eval_combo_part_1(combo, numbers) == target:
+                total_calibration_result += target
+                break
     return total_calibration_result
 
-
-def evaluate_with_pruning(numbers, target, current_value, index): # recursion
-    if index == len(numbers):
-        return current_value == target
-
-    # # Pruning condition: stop if current value cannot logically lead to target
-    if current_value > target:
-        return False # careful if ones exist since adding can result in bigger then multiplying
-                     # but it seems theres no cases where it happens.
-
-    if evaluate_with_pruning(numbers, target, current_value + numbers[index], index + 1):
-        return True
-
-    if evaluate_with_pruning(numbers, target, current_value * numbers[index], index + 1):
-        return True
-
-    concatenated_value = int(str(current_value) + str(numbers[index]))
-    if evaluate_with_pruning(numbers, target, concatenated_value, index + 1):
-        return True
-
-    return False
-
+def eval_combo_part_2(combo, numbers):
+    resultat = numbers[0]
+    for index in range(0, len(numbers) - 1):
+        if combo[index] == "+":
+            resultat += numbers[index + 1]
+        elif combo[index] == "*":
+            resultat *= numbers[index + 1]
+        elif combo[index] == "|":
+            resultat = int(str(resultat) + str(numbers[index + 1]))
+    return resultat
 
 def part2():
     equations = get_data()
     total_calibration_result = 0
-
     for target, numbers in equations:
-        if evaluate_with_pruning(numbers, target, numbers[0], 1):
-            total_calibration_result += target
-
+        for combo in itertools.product("*+|", repeat=len(numbers)-1):
+            if eval_combo_part_2(combo, numbers) == target:
+                total_calibration_result += target
+                break
     return total_calibration_result
