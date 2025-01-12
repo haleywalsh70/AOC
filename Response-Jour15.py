@@ -5,137 +5,164 @@ def get_data():
     with open(cwd + '/Jour_15_input.txt', 'r') as file:
         data = file.read().strip()
     s1, s2 = data.split("\n\n")
-    return s1, s2
+    grid = [list(line) for line in s1.split("\n")]
+    steps = s2.replace("\n", "")
+    return grid, steps
+
+def in_grid_part1(n, i, j):
+    return (0 <= i < n) and (0 <= j < n)
+
+def move_part1(direction, n, ci, cj, grid):
+    newi, newj = ci + direction[0], cj + direction[1]
+    if not in_grid_part1(n, newi, newj):
+        return (ci, cj, grid)
+
+    # If is box, try pushing box
+    di, dj = ci, cj
+    while in_grid_part1(n, di, dj):
+        di += direction[0]
+        dj += direction[1]
+        if not in_grid_part1(n, di, dj):
+            break
+
+        if grid[di][dj] == "#":
+            break
+
+        if grid[di][dj] == ".":
+            grid[di][dj] = "O"
+            grid[ci][cj] = "."
+            ci, cj = ci+direction[0], cj+direction[1]
+            grid[ci][cj] = "@"
+            break
+    return (ci, cj, grid)
 
 def part1():
-    ans = 0
-    s1, s2 = get_data()
-    g = [list(r) for r in s1.split("\n")]
-    n, m = len(g), len(g[0])
-    cx, cy = 0 ,0
+    grid, steps = get_data()
+    n = len(grid)
+    dirs = {
+        "<": [0, -1],
+        "v": [1, 0],
+        ">": [0, 1],
+        "^": [-1, 0]
+    }
+    ci, cj = 0, 0
     for i in range(n):
-        for j in range(m):
-            if g[i][j] == "@":
-                cx, cy = i, j
+        for j in range(n):
+            if grid[i][j] == "@":
+                ci, cj = i, j
                 break
 
-    for move in s2.replace("\n", ""):
-        dx, dy = {
-            "^": (-1,  0),
-            "v": ( 1,  0),
-            ">": ( 0,  1),
-            "<": ( 0, -1),
-        }[move]
+    for step in steps:
+        ci, cj, grid = move_part1(dirs[step], n, ci, cj, grid)
 
-    bxs = []
-    nx, ny = cx + dx, cy + dy
-    while g[nx][ny] == "O":
-        bxs.append((nx, ny))
-        nx += dx
-        ny += dy
-
-    if g[nx][ny] == "#":
-        pass
-    else:
-        assert g[nx][ny] == "."
-        target = [(cx, cy)] + bxs + [(nx, ny)]
-        for (x1, y1), (x2, y2) in list(zip(target, target[1:]))[::-1]:
-            g[x2][y2] = g[x1][y1]
-        g[cx][cy] = "."
-        cx, cy = cx + dx, cy + dy
-
+    ans = 0
     for i in range(n):
-        for j in range(m):
-            if g[i][j] != "O":
-                continue
-            ans += 100 * i + j
-
+        for j in range(n):
+            if grid[i][j] == "O":
+                ans += (100*i + j)
     return ans
 
+def in_grid_part2(n, i, j):
+    return (0 <= i < n) and (0 <= j < 2*n)
+
+def move_part2(direction, n, ci, cj):
+    newi, newj = ci + direction[0], cj + direction[1]
+    if not in_grid_part2(n, newi, newj):
+        return ci, cj
+
+    if [newi, newj] in walls:
+        return ci, cj
+
+    stack = []
+    if [newi, newj] in boxes:
+        stack.append([newi, newj])
+    if [newi, newj-1] in boxes:
+        stack.append([newi, newj-1])
+
+    # Determine dependencies
+    can_move = True
+
+    seen = set()
+    while len(stack) > 0:
+        topi, topj = stack.pop()
+        ni, nj = topi + direction[0], topj + direction[1]
+        if not in_grid_part2(n, ni, nj):
+            can_move = False
+            break
+
+        if [ni, nj] in walls or [ni, nj+1] in walls:
+            can_move = False
+            break
+
+        if (topi, topj) in seen:
+            continue
+        seen.add((topi, topj))
+
+        if [ni, nj] in boxes:
+            stack.append([ni, nj])
+        if [ni, nj-1] in boxes:
+            stack.append([ni, nj-1])
+        if [ni, nj+1] in boxes:
+            stack.append([ni, nj+1])
+
+    if not can_move:
+        return ci, cj
+
+    # Can move, hooray!
+    for i, box in enumerate(boxes):
+        if tuple(box) in seen:
+            boxes[i][0] += direction[0]
+            boxes[i][1] += direction[1]
+
+    ci += direction[0]
+    cj += direction[1]
+
+    return ci, cj
 
 def part2():
+    global grid, boxes, walls
+    grid, steps = get_data()
+    n = len(grid)
+    dirs = {
+        "<": [0, -1],
+        "v": [1, 0],
+        ">": [0, 1],
+        "^": [-1, 0]
+    }
+    boxes = []
+    walls = []
+    ci, cj = 0, 0
+
+    for i in range(n):
+        for j in range(n):
+            if grid[i][j] == "@":
+                ci, cj = i, j*2
+            elif grid[i][j] == "O":
+                boxes.append([i, j*2])
+            elif grid[i][j] == "#":
+                walls.append([i, j*2])
+                walls.append([i, j*2+1])
+
+    for step in steps:
+        ci, cj = move_part2(dirs[step], n, ci, cj)
+
     ans = 0
-    s1, s2 = get_data()
-    g = [list(r) for r in s1.split("\n")]
-    g2 = []
-    for row in g:
-        nrow = []
-        for cx in row:
-            if cx == "#":
-                nrow.append("#")
-                nrow.append("#")
-            elif cx == "O":
-                nrow.append("[")
-                nrow.append("]")
-            elif cx == ".":
-                nrow.append(".")
-                nrow.append(".")
-            elif cx == "@":
-                nrow.append("@")
-                nrow.append(".")
-            else:
-                assert False
-        g2.append(nrow)
-
-    g = g2
-    n, m = len(g), len(g[0])
-    cx, cy = 0 ,0
-    for i in range(n):
-        for j in range(m):
-            if g[i][j] == "@":
-                cx, cy = i, j
-                break
-
-    instruction = s2.replace("\n", "")
-    for idx, move in enumerate(instruction):
-        dx, dy = {
-            "^": (-1,  0),
-            "v": ( 1,  0),
-            ">": ( 0,  1),
-            "<": ( 0, -1),
-        }[move]
-
-        c2m = [(cx, cy)]
-        i = 0
-        impossible = False
-        while i < len(c2m):
-            x, y = c2m[i]
-            nx, ny = x + dx, y + dy
-            if g[nx][ny] in "O[]":
-                if (nx, ny) not in c2m:
-                    c2m.append((nx, ny))
-
-                    if g[nx][ny] == "[":
-                        if (nx, ny + 1) not in c2m:
-                            c2m.append((nx, ny + 1))
-
-                    if g[nx][ny] == "]":
-                        if (nx, ny - 1) not in c2m:
-                            c2m.append((nx, ny - 1))
-
-            elif g[nx][ny] == "#":
-                impossible = True
-                break
-
-            i += 1
-        if impossible:
-            continue
-
-        new_grid = [[g[i][j] for j in range(m)] for i in range(n)]
-
-        for x, y in c2m:
-            new_grid[x][y] = "."
-        for x, y in c2m:
-            new_grid[x + dx][y + dy] = g[x][y]
-
-        g = new_grid
-        cx += dx
-        cy += dy
-
-    for i in range(n):
-        for j in range(m):
-            if g[i][j] != "[":
-                continue
-            ans += 100 * i + j
+    for i, j in boxes:
+        ans += i*100 + j
 
     return ans
+
+def print_grid(boxes, walls, ci, cj):
+    for i in range(n):
+        for j in range(n*2):
+            if [i, j] in walls:
+                print("#", end="")
+            elif [i, j] in boxes:
+                print("[", end="")
+            elif [i, j-1] in boxes:
+                print("]", end="")
+            elif (i, j) == (ci, cj):
+                print("@", end="")
+            else:
+                print(".", end="")
+        print()
